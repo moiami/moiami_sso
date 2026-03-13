@@ -4,13 +4,14 @@ from fastapi import Depends
 from typing import Dict
 from app.data.repositories.Repository import get_user, get_users
 from app.data.schemas.User import UserDto
-from constants import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SCHEME
+from constants import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SCHEME, REFRESH_TOKEN_EXPIRE_MINUTES
 
 def login(user_in: UserDto):
     for user in get_users():
         if user_in.login == user.get("login") and user_in.password == user.get("password"):
-            token = create_jwt({"sub": user.get("login")})
-            return {"access_token": token, "token_type": "bearer"}
+            access_token = create_jwt({"sub": user.get("login")},"access")
+            refresh_token = create_jwt({"sub": user.get("login")},"refresh")
+            return {"access_token": access_token, "token_type": "bearer","refresh_token": refresh_token}
     return {"error": "Invalid credentials"}
 
 def get_role(current_user: str):
@@ -19,9 +20,14 @@ def get_role(current_user: str):
         return user
     return {"error": "User not found"}
 
-def create_jwt(data: Dict):
+def create_jwt(data: Dict,type:str):
     encode_data = data.copy()
-    encode_data.update({"exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)})
+    time = datetime.datetime.utcnow()
+    if type == "access":
+        time+=datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    else:
+        time+=datetime.timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+    encode_data.update({"exp":time })
     return jwt.encode(encode_data, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_tokens_data(token: str = Depends(SCHEME)):
