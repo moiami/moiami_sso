@@ -8,7 +8,7 @@ router = APIRouter(prefix='')
 @router.post("/login")
 async def login(user_in: UserDto):
     logging.info('POST: /login.')
-    return security_login(user_in)
+    return await security_login(user_in)
 
 @router.get("/refresh")
 async def refresh(request: Request):
@@ -19,4 +19,4 @@ async def refresh(request: Request):
 @router.get("/role")
 async def get_role(current_user: str = Depends(get_tokens_data)):
     logging.info('GET: /role.')
-    return get_security_role(current_user)
+    return await get_security_role(current_user)

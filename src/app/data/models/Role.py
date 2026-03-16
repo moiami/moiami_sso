@@ -1,9 +1,10 @@
 from uuid import uuid4
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy import UUID, Column, String, Text
-from app.data.models.UserRole import UserRole
 
-Base = declarative_base()
+from app.data.models.UserRole import UserRole
+from app.data.models.base import Base
+
 
 class Role(Base):
     __tablename__ = "roles"

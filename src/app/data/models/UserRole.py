@@ -1,7 +1,7 @@
 from sqlalchemy import UUID, Column,ForeignKey
-from sqlalchemy.orm import declarative_base
 
-Base = declarative_base()
+from app.data.models.base import Base
+
 
 class UserRole(Base):
     __tablename__ = "user_roles"

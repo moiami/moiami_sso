@@ -2,12 +2,12 @@ from typing import List
 from uuid import uuid4
 from passlib.hash import pbkdf2_sha256
 from pydantic import EmailStr
-from sqlalchemy.orm import relationship, Mapped, declarative_base
+from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy import UUID, Column, String
 from app.data.models.Role import Role
 from app.data.models.UserRole import UserRole
+from app.data.models.base import Base
 
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
@@ -29,3 +29,6 @@ class User(Base):
 
     def check_password(self, password: str):
         return pbkdf2_sha256.verify(password, self.password_hash)
+
+    def assign_role(self, role: Role):
+        self.roles.append(role)
