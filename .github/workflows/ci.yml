@@ -3,38 +3,28 @@ name: Python CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 jobs:
   python-ci:
-    uses: OnYyon/oregon-ci-templates/.github/workflows/lint-python.yml@main
+    uses: Oregon-MAI/oregon-ci-templates/.github/workflows/lint-python.yml@main
     with:
       python-version: "3.14"
       test-path: "./tests"
       coverage-threshold: 80
 
-  docker-push:
+  docker:
     needs: python-ci
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
-    uses: OnYyon/oregon-ci-templates/.github/workflows/docker-push.yml@main
+    uses: Oregon-MAI/oregon-ci-templates/.github/workflows/docker-push.yml@main
     secrets: inherit
     with:
-      push_to_registry: true
-      platforms: "linux/amd64"
-
-  docker-build:
-    needs: python-ci
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      packages: write
-    uses: OnYyon/oregon-ci-templates/.github/workflows/docker-push.yml@main
-    secrets: inherit
-    with:
-      push_to_registry: false
-      platforms: "linux/amd64"
+      push_to_registry: ${{
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))}}
+      platforms: "linux/amd64,linux/arm64"
