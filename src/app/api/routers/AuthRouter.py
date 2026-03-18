@@ -1,12 +1,12 @@
 import logging
 from fastapi import Depends, APIRouter,Request
-from app.data.schemas.User import UserDto
+from app.data.schemas.User import UserLoginDto
 from app.services.SecurityService import get_tokens_data,login as security_login, get_role as get_security_role
 
 router = APIRouter(prefix='')
 
 @router.post("/login")
-async def login(user_in: UserDto):
+async def login(user_in: UserLoginDto):
     logging.info('POST: /login.')
     return await security_login(user_in)
 

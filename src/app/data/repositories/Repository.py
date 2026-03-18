@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload, raiseload, selectinload
 
 from app.data.models.Role import Role
 from app.data.models.User import User
@@ -14,11 +15,13 @@ async def get_users():
     res = []
     async with async_session() as session:
         async with session.begin():
-            result = await session.execute(select(User))
+            result = await session.execute(select(User).options(selectinload(User.roles)) )
             data = result.scalars().all()
 
     for user in data:
         us = User(user.login,user.password_hash,user.first_name,user.last_name,user.email)
+        for role in list(user.roles):
+            us.assign_role(role)
         res.append(us)
     return res
 

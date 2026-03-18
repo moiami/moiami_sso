@@ -5,10 +5,10 @@ from typing import Dict
 from starlette import status
 
 from app.data.repositories.Repository import get_user, get_users
-from app.data.schemas.User import UserDto
+from app.data.schemas.User import UserLoginDto
 from constants import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SCHEME, REFRESH_TOKEN_EXPIRE_MINUTES
 
-async def login(user_in: UserDto):
+async def login(user_in: UserLoginDto):
     users = await get_users()
     for user in users:
         if user_in.login == user.login or user.check_password(user_in.password):
@@ -20,6 +20,7 @@ async def login(user_in: UserDto):
 async def get_role(current_user: str):
     user = await get_user(current_user)
     if user:
+        #заменить на UserDto
         return user
     return {"error": "User not found"}
 
