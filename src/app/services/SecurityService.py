@@ -5,6 +5,7 @@ from typing import Dict
 from starlette import status
 
 from app.data.repositories.Repository import get_user, get_users
+from app.data.schemas.Role import RoleDto
 from app.data.schemas.User import UserLoginDto
 from constants import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SCHEME, REFRESH_TOKEN_EXPIRE_MINUTES
 
@@ -12,21 +13,24 @@ async def login(user_in: UserLoginDto):
     users = await get_users()
     for user in users:
         if user_in.login == user.login or user.check_password(user_in.password):
-            access_token = await create_jwt({"sub": user.login},"access")
-            refresh_token = await create_jwt({"sub": user.login},"refresh")
+            access_token = await create_jwt({"sub": str(user.id)},"access")
+            refresh_token = await create_jwt({"sub": str(user.id)},"refresh")
             return {"access_token": access_token, "token_type": "bearer","refresh_token": refresh_token}
     return {"error": "Invalid credentials"}
 
-async def refresh(current_user: str):
+async def refresh(current_user):
     user = await get_user(current_user)
     access_token = await create_jwt({"sub": user.login},"access")
     return {"access_token": access_token, "token_type": "bearer"}
 
-async def get_role(current_user: str):
+async def get_role(current_user):
     user = await get_user(current_user)
     if user:
-        #заменить на UserDto
-        return user
+        res = []
+        for role in list(user.roles):
+            user_role = RoleDto(name=role.name,description=role.description)
+            res.append(user_role)
+        return res
     return {"error": "User not found"}
 
 async def create_jwt(data: Dict,type:str):
@@ -42,7 +46,6 @@ async def create_jwt(data: Dict,type:str):
 async def get_tokens_data(token: str = Depends(SCHEME)):
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-        print(data)
         return data.get("sub")
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="The token has expired")
