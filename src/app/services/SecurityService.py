@@ -17,6 +17,11 @@ async def login(user_in: UserLoginDto):
             return {"access_token": access_token, "token_type": "bearer","refresh_token": refresh_token}
     return {"error": "Invalid credentials"}
 
+async def refresh(current_user: str):
+    user = await get_user(current_user)
+    access_token = await create_jwt({"sub": user.login},"access")
+    return {"access_token": access_token, "token_type": "bearer"}
+
 async def get_role(current_user: str):
     user = await get_user(current_user)
     if user:
