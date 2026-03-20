@@ -4,8 +4,7 @@ from fastapi import Depends, HTTPException
 from typing import Dict
 from starlette import status
 
-from app.data.repositories.Repository import get_user, get_users
-from app.data.schemas.Role import RoleDto
+from app.data.repositories.UserRepository import get_user, get_users
 from app.data.schemas.User import UserLoginDto
 from constants import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SCHEME, REFRESH_TOKEN_EXPIRE_MINUTES
 
@@ -22,16 +21,6 @@ async def refresh(current_user):
     user = await get_user(current_user)
     access_token = await create_jwt({"sub": user.login},"access")
     return {"access_token": access_token, "token_type": "bearer"}
-
-async def get_role(current_user):
-    user = await get_user(current_user)
-    if user:
-        res = []
-        for role in list(user.roles):
-            user_role = RoleDto(name=role.name,description=role.description)
-            res.append(user_role)
-        return res
-    return {"error": "User not found"}
 
 async def create_jwt(data: Dict,type:str):
     encode_data = data.copy()
