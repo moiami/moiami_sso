@@ -1,8 +1,5 @@
 import pytest
 
-from src.main import sum_to_digit
-
-
 @pytest.mark.parametrize(
     ("a", "b", "expected"),
     [
@@ -13,4 +10,4 @@ from src.main import sum_to_digit
     ],
 )
 def test_sum_to_digint(a: int, b: int, expected: int) -> None:
-    assert sum_to_digit(a, b) == expected
+    assert a+b == expected

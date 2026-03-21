@@ -1,5 +1,12 @@
-def sum_to_digit(a: int, b: int) -> int:
-    return a + b
+from fastapi import FastAPI
+from app.api.routers.AuthRouter import router as auth_router
+from app.api.routers.UserRouter import router as user_router
+from app.api.routers.RoleRouter import router as role_router
+import logging
 
+logging.basicConfig(level=logging.DEBUG, filename="sso.log", filemode="a", datefmt='%Y-%m-%d %H:%M:%S',format="[%(asctime)s] %(levelname)s %(message)s")
 
-print(sum_to_digit(10, 15))
+app = FastAPI()
+app.include_router(auth_router)
+app.include_router(user_router)
+app.include_router(role_router)
