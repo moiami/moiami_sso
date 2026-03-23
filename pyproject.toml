@@ -53,6 +53,7 @@ select = [
 
 ignore = [
     "E501",
+    "B008",
 ]
 
 fixable = ["ALL"]

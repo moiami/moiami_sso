@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
 
-from app.data.schemas.role import RoleCreateDto, RoleDto
+from app.data.schemas.role import RoleConnectDto, RoleDto
 
 
 class UserCreateDto(BaseModel):
@@ -11,7 +11,7 @@ class UserCreateDto(BaseModel):
     name: str
     surname: str
     email: EmailStr
-    roles: list[RoleCreateDto]
+    roles: list[RoleConnectDto]
 
 class UserUpdateDto(BaseModel):
     id: UUID
@@ -19,7 +19,7 @@ class UserUpdateDto(BaseModel):
     name: str
     surname: str
     email: EmailStr
-    roles: list[RoleCreateDto]
+    roles: list[RoleConnectDto]
 
 class UserDeleteDto(BaseModel):
     id: UUID

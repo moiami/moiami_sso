@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, select
@@ -12,7 +14,7 @@ engine = create_async_engine(DB_URL, echo=True, future=True)
 async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def get_roles():
+async def get_roles() -> Sequence[Any]:
     async with async_session() as session, session.begin():
         result = await session.execute(select(Role).options())
         return result.scalars().all()
@@ -34,10 +36,8 @@ async def update_role(role: RoleUpdateDto) -> None:
         role_to_update: Role = await get_role(role.id)
         role_to_update.name = role.name
         role_to_update.description = role.description
-        await session.refresh(role_to_update)
 
 
 async def delete_role(role: UUID) -> None:
     async with async_session() as session, session.begin():
-        stmt = delete(Role).where(Role.id == role)
-        await session.execute(stmt)
+        await session.execute(delete(Role).where(Role.id == role))

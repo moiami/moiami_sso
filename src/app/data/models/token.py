@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import UUID, Column, Text, Boolean
+from sqlalchemy import UUID, Boolean, Column, Text
 
 from app.data.models.base import Base
 

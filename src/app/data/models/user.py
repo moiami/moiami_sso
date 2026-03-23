@@ -28,7 +28,7 @@ class User(Base):
         self.last_name = last_name
         self.email = email
 
-    def check_password(self, password: str):
+    def check_password(self, password: str) -> bool:
         return pbkdf2_sha256.verify(password, self.password_hash)
 
     def assign_role(self, role: Role) -> None:
