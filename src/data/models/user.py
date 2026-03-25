@@ -34,6 +34,3 @@ class User(Base):
 
     def check_password(self, password: str) -> bool:
         return pbkdf2_sha256.verify(password, str(self.password_hash))
-
-    def assign_role(self, role: Role) -> None:
-        self.roles.append(role)

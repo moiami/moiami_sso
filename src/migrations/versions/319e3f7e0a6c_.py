@@ -55,6 +55,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('user_id', 'role_id')
     )
     # ### end Alembic commands ###
+    op.execute("INSERT INTO roles(id,name, description) VALUES('00000000-0000-0000-0000-000000000001','admin', 'admin') ON CONFLICT DO NOTHING;")
+    op.execute("INSERT INTO roles(id,name, description) VALUES('00000000-0000-0000-8000-000000000002','user', 'user') ON CONFLICT DO NOTHING;")
+    op.execute("""
+            INSERT INTO users (id,login, password_hash, first_name, last_name, email) 
+            VALUES ('00000000-0000-0000-8000-000000000001','admin', '$pbkdf2-sha256$29000$E0IoZYwxhtDae28tRQhB6A$8Jv7R7/T3vnQaRCEnes9ru0ouAGM9TNPtrYCzaw0IF8', 'admin', 'admin', 'admin@admin.com') ON CONFLICT DO NOTHING;
+        """)
+    op.execute("""
+            INSERT INTO user_roles (user_id, role_id)
+            SELECT u.id, r.id 
+            FROM users u, roles r 
+            WHERE u.login = 'admin' AND r.name = 'admin' ON CONFLICT DO NOTHING;
+        """)
 
 
 def downgrade() -> None:
