@@ -1,3 +1,4 @@
+import uuid
 from uuid import uuid4
 
 from sqlalchemy import UUID, Boolean, Column, Text
@@ -11,7 +12,7 @@ class Token(Base):
     token = Column(Text, index=True, nullable=False)
     status = Column(Boolean, nullable=False)
 
-    def __init__(self,id:UUID, token: str, status: bool) -> None:
+    def __init__(self, id: uuid.UUID, token: str, status: bool) -> None:
         self.id = id
         self.token = token
         self.status = status

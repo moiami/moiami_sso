@@ -8,8 +8,10 @@ class RoleDto(BaseModel):
     name: str
     description: str
 
+
 class RoleConnectDto(BaseModel):
     id: UUID
+
 
 class RoleCreateDto(BaseModel):
     name: str
