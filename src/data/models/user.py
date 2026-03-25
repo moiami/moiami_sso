@@ -19,9 +19,13 @@ class User(Base):
     first_name = Column(String(50))
     last_name = Column(String(50))
     email = Column(String(255))
-    roles: Mapped[list[Role]] = relationship("Role",secondary=UserRole.__tablename__,back_populates="users",cascade="all, delete")
+    roles: Mapped[list[Role]] = relationship(
+        "Role", secondary=UserRole.__tablename__, back_populates="users", cascade="all, delete"
+    )
 
-    def __init__(self,login: str,password: str,first_name: str,last_name: str,email: EmailStr) -> None:
+    def __init__(
+        self, login: str, password: str, first_name: str, last_name: str, email: EmailStr
+    ) -> None:
         self.login = login
         self.password_hash = pbkdf2_sha256.hash(password)
         self.first_name = first_name
@@ -29,7 +33,7 @@ class User(Base):
         self.email = email
 
     def check_password(self, password: str) -> bool:
-        return pbkdf2_sha256.verify(password, self.password_hash)
+        return pbkdf2_sha256.verify(password, str(self.password_hash))
 
     def assign_role(self, role: Role) -> None:
         self.roles.append(role)

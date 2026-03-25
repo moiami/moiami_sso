@@ -11,4 +11,4 @@ import pytest
     ],
 )
 def test_sum_to_digint(a: int, b: int, expected: int) -> None:
-    assert a+b == expected
+    assert a + b == expected

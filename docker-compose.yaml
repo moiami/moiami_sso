@@ -10,11 +10,10 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: postgres
 
-  api:
+  sso:
     build: .
-    container_name: fastapi_app
+    restart: unless-stopped
     ports:
       - "8000:8000"
     depends_on:
       - db
-    restart: unless-stopped

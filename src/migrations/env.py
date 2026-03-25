@@ -44,7 +44,12 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     configuration = config.get_section(config.config_ini_section)
+
+    assert configuration is not None, "Configuration section not found"
+
     configuration["sqlalchemy.url"] = get_url()
+
+
 
     connectable = async_engine_from_config(
         configuration,
