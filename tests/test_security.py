@@ -57,7 +57,9 @@ async def test_login_user_not_found() -> None:
 async def test_login_wrong_password(mock_user: MagicMock) -> None:
     user_in = UserLoginDto(login="test", password="wrong")
     mock_user.check_password.return_value = False
-    with patch("src.services.security_service.get_user_by_login", AsyncMock(return_value=mock_user)):
+    with patch(
+        "src.services.security_service.get_user_by_login", AsyncMock(return_value=mock_user)
+    ):
         result = await login(user_in)
         assert result == {"Info": "Login Failed"}
 

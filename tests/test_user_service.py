@@ -67,21 +67,27 @@ async def test_user_success(mock_user: MagicMock) -> None:
 
 
 async def test_user_error() -> None:
-    with patch("src.services.user_service.get_user_by_id", AsyncMock(side_effect=Exception("Error"))):
+    with patch(
+        "src.services.user_service.get_user_by_id", AsyncMock(side_effect=Exception("Error"))
+    ):
         with pytest.raises(HTTPException) as exc:
             await user(uuid4())
         assert exc.value.status_code == 500
 
 
 async def test_create_user_success() -> None:
-    user_in = UserCreateDto(login="test", password="pass", name="Test", surname="User", email="test@example.com")
+    user_in = UserCreateDto(
+        login="test", password="pass", name="Test", surname="User", email="test@example.com"
+    )
     with patch("src.services.user_service.insert", AsyncMock()):
         result = await create_user(user_in)
         assert result == {"Info": "Success"}
 
 
 async def test_create_user_error() -> None:
-    user_in = UserCreateDto(login="test", password="pass", name="Test", surname="User", email="test@example.com")
+    user_in = UserCreateDto(
+        login="test", password="pass", name="Test", surname="User", email="test@example.com"
+    )
     with patch("src.services.user_service.insert", AsyncMock(side_effect=Exception("Error"))):
         with pytest.raises(HTTPException) as exc:
             await create_user(user_in)
@@ -140,13 +146,13 @@ async def test_update_user_no_permission(mock_user: MagicMock) -> None:
 
 
 async def test_delete_user_success(mock_admin_user: MagicMock) -> None:
-     user_in = UserDeleteDto(id=uuid4())
-     with (
-         patch("src.services.user_service.get_user_by_id", AsyncMock(return_value=mock_admin_user)),
-         patch("src.services.user_service.delete", AsyncMock()),
-     ):
-         result = await delete_user(user_in, mock_admin_user.id)
-         assert result == {"Info": "Success"}
+    user_in = UserDeleteDto(id=uuid4())
+    with (
+        patch("src.services.user_service.get_user_by_id", AsyncMock(return_value=mock_admin_user)),
+        patch("src.services.user_service.delete", AsyncMock()),
+    ):
+        result = await delete_user(user_in, mock_admin_user.id)
+        assert result == {"Info": "Success"}
 
 
 async def test_delete_user_no_permission(mock_user: MagicMock) -> None:
