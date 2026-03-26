@@ -8,6 +8,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_MINUTES = 10080
 
-DB_URL = "postgresql+asyncpg://postgres:root@db:5433/postgres"
+DB_URL = "postgresql+asyncpg://postgres:root@postgres-sso-service:5433/postgres"
 
 ADMIN_USERNAME = "admin"
