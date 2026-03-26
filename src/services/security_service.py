@@ -33,9 +33,8 @@ async def login(user_in: UserLoginDto) -> dict[str, str]:
             )
             await insert_token(Token(id_refresh, refresh_token, True))
             return {
-                "id": str(user.id),
+                "user_id": str(user.id),
                 "access_token": access_token,
-                "token_type": "bearer",
                 "refresh_token": refresh_token,
             }
     except Exception as e:
@@ -60,7 +59,6 @@ async def refresh(current_user: UUID, token: Token) -> dict[str, str]:
         await insert_token(Token(id_refresh, refresh_token, True))
         return {
             "access_token": access_token,
-            "token_type": "bearer",
             "refresh_token": refresh_token,
         }
     except Exception as e:
@@ -85,14 +83,41 @@ async def create_jwt(data: dict, type: str) -> str:
         ) from e
 
 
-async def validate_token(token: str = Depends(SCHEME)) -> dict[str, str]:
+async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
     try:
-        jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-        return {"info": "valid"}
-    except jwt.ExpiredSignatureError:
-        return {"info": "The token has expired"}
-    except jwt.InvalidTokenError:
-        return {"info": "Invalid token"}
+        data: dict[str, Any] = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        token_from_db: Token = await get_token(UUID(data.get("id")))
+        user_from_db: User = await get_user_by_id(UUID(data.get("id")))
+        if token_from_db is None or token_from_db.status is False:
+            raise jwt.InvalidTokenError
+        return {"id": data.get("id"),
+                "login": str(user_from_db.login),
+                "name": str(user_from_db.first_name),
+                "surname": str(user_from_db.last_name),
+                "email": str(user_from_db.email),
+                "roles": [str(role.name) for role in user_from_db.roles],
+                "is_valid": "True"
+                }
+    except jwt.ExpiredSignatureError as e:
+        raise HTTPException(status_code=401, detail={"id": "NULL",
+                                                     "login": "NULL",
+                                                     "name": "NULL",
+                                                     "surname": "NULL",
+                                                     "email": "NULL",
+                                                     "roles": "NULL",
+                                                     "is_valid": "False",
+                                                     "info": "The token has expired"
+                                                     }) from e
+    except Exception as e:
+        raise HTTPException(status_code=401, detail={"id": "NULL",
+                                                     "login": "NULL",
+                                                     "name": "NULL",
+                                                     "surname": "NULL",
+                                                     "email": "NULL",
+                                                     "roles": "NULL",
+                                                     "is_valid": "False",
+                                                     "info": "Invalid token"
+                                                     }) from e
 
 
 async def get_refresh_tokens_data(token: str = Depends(SCHEME)) -> tuple[Token, UUID]:
@@ -104,7 +129,7 @@ async def get_refresh_tokens_data(token: str = Depends(SCHEME)) -> tuple[Token, 
         return token_from_db, UUID(data.get("user_id"))
     except jwt.ExpiredSignatureError as e:
         raise HTTPException(status_code=401, detail="The token has expired") from e
-    except jwt.InvalidTokenError as e:
+    except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid token") from e
 
 
@@ -116,5 +141,5 @@ async def get_access_tokens_data(token: str = Depends(SCHEME)) -> UUID:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="The token has expired"
         ) from e
-    except jwt.InvalidTokenError as e:
+    except Exception as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from e

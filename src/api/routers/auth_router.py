@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -19,15 +20,15 @@ async def auth(user_in: UserLoginDto) -> dict[str, str]:
     return await security_login(user_in)
 
 
-@router.get("/validate")
-async def validate(data: dict[str, str] = Depends(validate_token)) -> dict[str, str]:
-    logging.info("GET: /validate.")
+@router.post("/validate")
+async def validate(data: dict[str, str] = Depends(validate_token)) -> dict[str, Any]:
+    logging.info("POST: /validate.")
     return data
 
 
-@router.get("/refresh")
+@router.post("/refresh")
 async def refresh(data: tuple[Token, UUID] = Depends(get_refresh_tokens_data)) -> dict[str, str]:
-    logging.info("GET: /refresh.")
+    logging.info("POST: /refresh.")
     return await security_refresh(data[1], data[0])
 
 

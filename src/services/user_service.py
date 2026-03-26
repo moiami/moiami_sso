@@ -1,10 +1,12 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import HTTPException
 from starlette import status
 
 from src.constants import ADMIN_USERNAME
+from src.data.models.token import Token
 from src.data.models.user import User
+from src.data.repositories.auth_repository import insert_token
 from src.data.repositories.user_repository import delete_user as delete
 from src.data.repositories.user_repository import get_user_by_id, get_users
 from src.data.repositories.user_repository import insert_user as insert
@@ -17,6 +19,7 @@ from src.data.schemas.user import (
     UserDto,
     UserUpdateDto,
 )
+from src.services.security_service import create_jwt
 
 
 async def users() -> list[UserDto]:
@@ -54,11 +57,23 @@ async def user(id: UUID) -> User:
 
 async def create_user(user_in: UserCreateDto) -> dict[str, str]:
     try:
+        id_us: UUID = uuid4()
         user: User = User(
             user_in.login, user_in.password, user_in.name, user_in.surname, user_in.email
         )
+        user.id = id_us
         await insert(user)
-        return {"Info": "Success"}
+        access_token = await create_jwt(
+            {"id": str(id_us), "roles": []}, "access"
+        )
+        refresh_token = await create_jwt(
+            {"id": str(id_us), "user_id": str(id_us)}, "refresh"
+        )
+        await insert_token(Token(id_us, refresh_token, True))
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
     except TypeError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND") from e
     except Exception as e:
