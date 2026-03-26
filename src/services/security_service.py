@@ -33,6 +33,7 @@ async def login(user_in: UserLoginDto) -> dict[str, str]:
             )
             await insert_token(Token(id_refresh, refresh_token, True))
             return {
+                "id": str(user.id),
                 "access_token": access_token,
                 "token_type": "bearer",
                 "refresh_token": refresh_token,
