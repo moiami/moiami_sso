@@ -1,3 +1,4 @@
+from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -164,8 +165,9 @@ async def test_validate_token_expired() -> None:
         await validate_token(expired_token)
 
     assert exc.value.status_code == 401
-    assert exc.value.detail["info"] == "The token has expired"
-    assert exc.value.detail["is_valid"] == "False"
+    detail = cast(dict[str, Any], exc.value.detail)
+    assert detail["info"] == "The token has expired"
+    assert detail["is_valid"] == "False"
 
 
 async def test_validate_token_invalid_signature() -> None:
@@ -175,7 +177,8 @@ async def test_validate_token_invalid_signature() -> None:
         await validate_token(invalid_token)
 
     assert exc.value.status_code == 401
-    assert exc.value.detail["info"] == "Invalid token"
+    detail = cast(dict[str, Any], exc.value.detail)
+    assert detail["info"] == "Invalid token"
 
 
 async def test_validate_token_not_in_db(mock_token: MagicMock) -> None:
