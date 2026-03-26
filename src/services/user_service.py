@@ -63,12 +63,8 @@ async def create_user(user_in: UserCreateDto) -> dict[str, str]:
         )
         user.id = id_us
         await insert(user)
-        access_token = await create_jwt(
-            {"id": str(id_us), "roles": []}, "access"
-        )
-        refresh_token = await create_jwt(
-            {"id": str(id_us), "user_id": str(id_us)}, "refresh"
-        )
+        access_token = await create_jwt({"id": str(id_us), "roles": []}, "access")
+        refresh_token = await create_jwt({"id": str(id_us), "user_id": str(id_us)}, "refresh")
         await insert_token(Token(id_us, refresh_token, True))
         return {
             "access_token": access_token,

@@ -90,34 +90,43 @@ async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
         user_from_db: User = await get_user_by_id(UUID(data.get("id")))
         if token_from_db is None or token_from_db.status is False:
             raise jwt.InvalidTokenError
-        return {"id": data.get("id"),
-                "login": str(user_from_db.login),
-                "name": str(user_from_db.first_name),
-                "surname": str(user_from_db.last_name),
-                "email": str(user_from_db.email),
-                "roles": [str(role.name) for role in user_from_db.roles],
-                "is_valid": "True"
-                }
+        return {
+            "id": data.get("id"),
+            "login": str(user_from_db.login),
+            "name": str(user_from_db.first_name),
+            "surname": str(user_from_db.last_name),
+            "email": str(user_from_db.email),
+            "roles": [str(role.name) for role in user_from_db.roles],
+            "is_valid": "True",
+        }
     except jwt.ExpiredSignatureError as e:
-        raise HTTPException(status_code=401, detail={"id": "NULL",
-                                                     "login": "NULL",
-                                                     "name": "NULL",
-                                                     "surname": "NULL",
-                                                     "email": "NULL",
-                                                     "roles": "NULL",
-                                                     "is_valid": "False",
-                                                     "info": "The token has expired"
-                                                     }) from e
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "id": "NULL",
+                "login": "NULL",
+                "name": "NULL",
+                "surname": "NULL",
+                "email": "NULL",
+                "roles": "NULL",
+                "is_valid": "False",
+                "info": "The token has expired",
+            },
+        ) from e
     except Exception as e:
-        raise HTTPException(status_code=401, detail={"id": "NULL",
-                                                     "login": "NULL",
-                                                     "name": "NULL",
-                                                     "surname": "NULL",
-                                                     "email": "NULL",
-                                                     "roles": "NULL",
-                                                     "is_valid": "False",
-                                                     "info": "Invalid token"
-                                                     }) from e
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "id": "NULL",
+                "login": "NULL",
+                "name": "NULL",
+                "surname": "NULL",
+                "email": "NULL",
+                "roles": "NULL",
+                "is_valid": "False",
+                "info": "Invalid token",
+            },
+        ) from e
 
 
 async def get_refresh_tokens_data(token: str = Depends(SCHEME)) -> tuple[Token, UUID]:
