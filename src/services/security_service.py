@@ -86,10 +86,7 @@ async def create_jwt(data: dict, type: str) -> str:
 async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
     try:
         data: dict[str, Any] = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-        token_from_db: Token = await get_token(UUID(data.get("id")))
         user_from_db: User = await get_user_by_id(UUID(data.get("id")))
-        if token_from_db is None or token_from_db.status is False:
-            raise jwt.InvalidTokenError
         return {
             "id": data.get("id"),
             "login": str(user_from_db.login),

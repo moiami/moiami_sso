@@ -1,4 +1,4 @@
-name: 'SSO'
+name: 'Moimai-sso'
 services:
   postgres-sso-service:
     image: postgres:latest
