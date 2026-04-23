@@ -46,9 +46,20 @@ async def users() -> list[UserDto]:
         ) from e
 
 
-async def user(id: UUID) -> User:
+async def user(id: UUID) -> UserDto:
     try:
-        return await get_user_by_id(id)
+        us = await get_user_by_id(id)
+        return UserDto(
+            id=UUID(str(us.id)),
+            login=str(us.login),
+            name=str(us.first_name),
+            surname=str(us.last_name),
+            email=str(us.email),
+            roles=[
+                RoleDto(id=UUID(str(el.id)), name=str(el.name), description=str(el.description))
+                for el in list(us.roles)
+            ],
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="INTERNAL SERVER ERROR"

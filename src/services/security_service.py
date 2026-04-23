@@ -20,7 +20,7 @@ from src.data.repositories.user_repository import get_user_by_id, get_user_by_lo
 from src.data.schemas.user import UserLoginDto
 
 
-async def login(user_in: UserLoginDto) -> dict[str, str]:
+async def login(user_in: UserLoginDto) -> dict[str, Any]:
     try:
         user: User = await get_user_by_login(user_in.login)
         if user_in.login == user.login and user.check_password(user_in.password):
@@ -33,7 +33,12 @@ async def login(user_in: UserLoginDto) -> dict[str, str]:
             )
             await insert_token(Token(id_refresh, refresh_token, True))
             return {
-                "user_id": str(user.id),
+                "id": str(user.id),
+                "login": str(user.login),
+                "name": str(user.first_name),
+                "surname": str(user.last_name),
+                "email": str(user.email),
+                "roles": [str(role.name) for role in user.roles],
                 "access_token": access_token,
                 "refresh_token": refresh_token,
             }
@@ -85,43 +90,22 @@ async def create_jwt(data: dict, type: str) -> str:
 
 async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
     try:
-        data: dict[str, Any] = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-        user_from_db: User = await get_user_by_id(UUID(data.get("id")))
+        jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         return {
-            "id": data.get("id"),
-            "login": str(user_from_db.login),
-            "name": str(user_from_db.first_name),
-            "surname": str(user_from_db.last_name),
-            "email": str(user_from_db.email),
-            "roles": [str(role.name) for role in user_from_db.roles],
             "is_valid": "True",
         }
     except jwt.ExpiredSignatureError as e:
         raise HTTPException(
             status_code=401,
             detail={
-                "id": "NULL",
-                "login": "NULL",
-                "name": "NULL",
-                "surname": "NULL",
-                "email": "NULL",
-                "roles": "NULL",
                 "is_valid": "False",
-                "info": "The token has expired",
             },
         ) from e
     except Exception as e:
         raise HTTPException(
             status_code=401,
             detail={
-                "id": "NULL",
-                "login": "NULL",
-                "name": "NULL",
-                "surname": "NULL",
-                "email": "NULL",
-                "roles": "NULL",
                 "is_valid": "False",
-                "info": "Invalid token",
             },
         ) from e
 

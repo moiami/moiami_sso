@@ -1,10 +1,41 @@
-"""
-async def roles() -> list[Role] | dict[str, str]:
+from uuid import UUID
+
+from fastapi import HTTPException
+from starlette import status
+
+from src.constants import ADMIN_USERNAME
+from src.data.models.role import Role
+from src.data.models.user import User
+from src.data.repositories.role_repository import (
+    delete_role as delete,
+)
+from src.data.repositories.role_repository import (
+    get_role,
+    get_roles,
+)
+from src.data.repositories.role_repository import (
+    insert_role as insert,
+)
+from src.data.repositories.role_repository import (
+    update_role as update,
+)
+from src.data.repositories.user_repository import get_user_by_id
+from src.data.schemas.role import RoleCreateDto, RoleDeleteDto, RoleDto, RoleUpdateDto
+
+
+async def roles() -> list[RoleDto]:
     try:
         roles_arr: list[Role] = await get_roles()
         if roles_arr is None:
             raise Exception
-        return roles_arr
+        result: list[RoleDto] = []
+        for role in roles_arr:
+            result.append(
+                RoleDto(
+                    id=UUID(str(role.id)), name=str(role.name), description=str(role.description)
+                )
+            )
+        return result
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="INTERNAL SERVER ERROR"
@@ -79,4 +110,3 @@ async def delete_role(role_in: RoleDeleteDto, current_user: UUID) -> dict[str, s
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="INTERNAL SERVER ERROR"
         ) from e
-"""

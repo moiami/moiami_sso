@@ -2,7 +2,7 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends
 
 from src.data.models.token import Token
 from src.data.schemas.user import UserCreateDto, UserLoginDto
@@ -15,15 +15,14 @@ router = APIRouter(prefix="/api/v1/auth")
 
 
 @router.post("/login")
-async def auth(user_in: UserLoginDto) -> dict[str, str]:
+async def auth(user_in: UserLoginDto) -> dict[str, Any]:
     logging.info("POST: /login.")
     return await security_login(user_in)
 
 
 @router.post("/validate")
-async def validate(data: dict[str, str] = Depends(validate_token), response: Response = None) -> dict[str, Any]:
+async def validate(data: dict[str, str] = Depends(validate_token)) -> dict[str, Any]:
     logging.info("POST: /validate.")
-    response.headers["X-User-ID"] = data.get("id", "")
     return data
 
 
