@@ -96,7 +96,7 @@ async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
 
         return {
             "user_id": str(data.get("id")),
-            "user_roles": str([RoleDto(id=role.id,name=role.name,description=role.description) for role in user.roles]),
+            "user_roles": str([role.name for role in user.roles]),
             "is_valid": "True",
         }
     except jwt.ExpiredSignatureError as e:
