@@ -90,8 +90,9 @@ async def create_jwt(data: dict, type: str) -> str:
 
 async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
     try:
-        jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        data: dict[str, Any] = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         return {
+            "user_id": str(data.get("id")),
             "is_valid": "True",
         }
     except jwt.ExpiredSignatureError as e:
