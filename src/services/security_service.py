@@ -6,6 +6,7 @@ import jwt
 from fastapi import Depends, HTTPException
 from starlette import status
 
+from src.data.schemas.role import RoleDto
 from src.constants import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
@@ -91,8 +92,11 @@ async def create_jwt(data: dict, type: str) -> str:
 async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
     try:
         data: dict[str, Any] = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        user: User = await get_user_by_id(UUID(str(data.get("id"))))
+
         return {
             "user_id": str(data.get("id")),
+            "user_roles": str([RoleDto(id=role.id,name=role.name,description=role.description) for role in user.roles]),
             "is_valid": "True",
         }
     except jwt.ExpiredSignatureError as e:

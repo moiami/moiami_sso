@@ -26,6 +26,7 @@ async def auth(user_in: UserLoginDto,response: Response) -> dict[str, Any]:
 async def validate(response: Response,data: dict[str, str] = Depends(validate_token)) -> dict[str, Any]:
     logging.info("POST: /validate.")
     response.headers["X-User-Id"] = data["user_id"]
+    response.headers["X-User-Role"] = data["user_roles"]
     return data
 
 
