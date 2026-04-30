@@ -2,7 +2,7 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,Response
 
 from src.data.models.token import Token
 from src.data.schemas.user import UserCreateDto, UserLoginDto
@@ -15,9 +15,11 @@ router = APIRouter(prefix="/api/v1/auth")
 
 
 @router.post("/login")
-async def auth(user_in: UserLoginDto) -> dict[str, Any]:
+async def auth(user_in: UserLoginDto,response: Response) -> dict[str, Any]:
     logging.info("POST: /login.")
-    return await security_login(user_in)
+    data = await security_login(user_in)
+    response.headers["X-User-Id"] = data["access_token"]
+    return data
 
 
 @router.post("/validate")
