@@ -366,7 +366,7 @@ wheels = [
 ]
 
 [[package]]
-name = "oregon-python-sso"
+name = "sso"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

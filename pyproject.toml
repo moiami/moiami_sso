@@ -1,5 +1,5 @@
 [project]
-name = "oregon-python-sso"
+name = "sso"
 version = "0.1.0"
 description = "sso"
 readme = "README.md"
