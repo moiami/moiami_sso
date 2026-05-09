@@ -6,7 +6,6 @@ import jwt
 from fastapi import Depends, HTTPException
 from starlette import status
 
-from src.data.schemas.role import RoleDto
 from src.constants import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
