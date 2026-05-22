@@ -67,6 +67,9 @@ ignore = [
     "B008",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ANN001", "B017"]
+
 fixable = ["ALL"]
 
 [tool.ty.src]
