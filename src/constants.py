@@ -1,15 +1,15 @@
 import os
+from pathlib import Path
 
 from fastapi.security import OAuth2PasswordBearer
-from pathlib import Path
 
 
 def key_load(file_path: str) -> str:
     path = Path(file_path)
     if not path.exists():
         raise Exception
-    res = ''
-    with open(path, "r", encoding="utf-8") as f:
+    res = ""
+    with open(path, encoding="utf-8") as f:
         res = f.read().strip()
     return res
 
