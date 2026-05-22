@@ -1,5 +1,9 @@
 # SSO сервис moiami
 
+Сервис написан на **FastApi**
+
+Сервис предостваляет возможность управления пользователями, ролями пользователей и refresh и access токенами.
+
 1. POST /api/v1/auth/login
 2. POST /api/v1/auth/validate
 3. POST /api/v1/auth/refresh
