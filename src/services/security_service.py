@@ -1,5 +1,4 @@
 import datetime
-import base64
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -10,18 +9,18 @@ from starlette import status
 from src.constants import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
+    CLIENT_ID,
+    ISSUER_URL,
+    PRIVATE_KEY,
+    PUBLIC_KEY,
     REFRESH_TOKEN_EXPIRE_MINUTES,
-    SCHEME, CLIENT_ID, ISSUER_URL, PRIVATE_KEY, PUBLIC_KEY,
+    SCHEME,
 )
 from src.data.models.token import Token
 from src.data.models.user import User
 from src.data.repositories.auth_repository import get_token, insert_token, update_token
 from src.data.repositories.user_repository import get_user_by_id, get_user_by_login
 from src.data.schemas.user import UserLoginDto
-
-from fastapi.responses import JSONResponse
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 
 
 async def login(user_in: UserLoginDto) -> dict[str, Any]:
@@ -75,40 +74,28 @@ async def refresh(current_user: UUID, token: Token) -> dict[str, str]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="INTERNAL SERVER ERROR"
         ) from e
 
-async def jwks():
-    public_key = serialization.load_pem_public_key(
-        PUBLIC_KEY.encode(), backend=default_backend()
-    )
-    numbers = public_key.public_numbers()
-
-    jwk = {
-        "kty": "RSA",
-        "use": "sig",
-        "kid": "sso-key-1",
-        "alg": "RS256",
-        "n": base64.urlsafe_b64encode(numbers.n.to_bytes((numbers.n.bit_length() + 7) // 8, "big")).decode().rstrip("="),
-        "e": base64.urlsafe_b64encode(numbers.e.to_bytes((numbers.e.bit_length() + 7) // 8, "big")).decode().rstrip("="),
-    }
-    return JSONResponse({"keys": [jwk]})
 
 async def create_jwt(data: dict, type: str) -> str:
     encode_data = data.copy()
     time = datetime.datetime.now(datetime.UTC)
     expire = ACCESS_TOKEN_EXPIRE_MINUTES if type == "access" else REFRESH_TOKEN_EXPIRE_MINUTES
-    encode_data.update({
-        "sub": data.get("id"),
-        "exp": time + datetime.timedelta(minutes=expire),
-        "iat": time,
-        "iss": ISSUER_URL,
-        "aud": CLIENT_ID,
-    })
+    encode_data.update(
+        {
+            "sub": data.get("id"),
+            "exp": time + datetime.timedelta(minutes=expire),
+            "iat": time,
+            "iss": ISSUER_URL,
+            "aud": CLIENT_ID,
+        }
+    )
     return jwt.encode(encode_data, PRIVATE_KEY, algorithm=ALGORITHM)
 
 
 async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
     try:
-        data: dict[str, Any] = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM], audience=CLIENT_ID,
-                                          issuer=ISSUER_URL)
+        data: dict[str, Any] = jwt.decode(
+            token, PUBLIC_KEY, algorithms=[ALGORITHM], audience=CLIENT_ID, issuer=ISSUER_URL
+        )
         user: User = await get_user_by_id(UUID(str(data.get("id"))))
 
         return {
@@ -133,25 +120,11 @@ async def validate_token(token: str = Depends(SCHEME)) -> dict[str, Any]:
         ) from e
 
 
-async def userinfo(token: str = Depends(SCHEME)) -> dict[str, Any]:
-    data = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM], audience=CLIENT_ID, issuer=ISSUER_URL)
-
-    user: User = await get_user_by_id(UUID(data["id"]))
-
-    return {
-        "sub": str(user.id),
-        "email": user.email,
-        "email_verified": True,
-        "name": f"{user.first_name} {user.last_name}",
-        "preferred_username": user.login,
-        "roles": [role.name for role in user.roles],
-        "groups": [role.name for role in user.roles],
-    }
-
-
 async def get_refresh_tokens_data(token: str = Depends(SCHEME)) -> tuple[Token, UUID]:
     try:
-        data = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM], audience=CLIENT_ID, issuer=ISSUER_URL)
+        data = jwt.decode(
+            token, PUBLIC_KEY, algorithms=[ALGORITHM], audience=CLIENT_ID, issuer=ISSUER_URL
+        )
         token_from_db: Token = await get_token(UUID(data.get("id")))
         if token_from_db is None or token_from_db.status is False:
             raise jwt.InvalidTokenError
@@ -164,7 +137,9 @@ async def get_refresh_tokens_data(token: str = Depends(SCHEME)) -> tuple[Token, 
 
 async def get_access_tokens_data(token: str = Depends(SCHEME)) -> UUID:
     try:
-        data = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM], audience=CLIENT_ID, issuer=ISSUER_URL)
+        data = jwt.decode(
+            token, PUBLIC_KEY, algorithms=[ALGORITHM], audience=CLIENT_ID, issuer=ISSUER_URL
+        )
         return UUID(data.get("id"))
     except jwt.ExpiredSignatureError as e:
         raise HTTPException(
